@@ -9,10 +9,8 @@ def get_connection():
     return psycopg2.connect(os.getenv("DATABASE_URL"))
 
 def init_db():
-    """Create all tables if they don't exist"""
     conn = get_connection()
     cur = conn.cursor()
-
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id VARCHAR PRIMARY KEY,
@@ -44,7 +42,6 @@ def init_db():
             status CHAR(1) CHECK (status IN ('P','A','L')),
             batch VARCHAR(50),
             teacher_id VARCHAR,
-            teacher_name VARCHAR(100),
             created_at TIMESTAMP DEFAULT NOW(),
             FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
         );
@@ -61,7 +58,6 @@ def init_db():
             remarks TEXT,
             batch VARCHAR(50),
             teacher_id VARCHAR,
-            teacher_name VARCHAR(100),
             created_at TIMESTAMP DEFAULT NOW(),
             FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
         );
@@ -96,12 +92,37 @@ def init_db():
             admission_status VARCHAR(20) DEFAULT 'open'
         );
 
+        CREATE TABLE IF NOT EXISTS absence_messages (
+            id SERIAL PRIMARY KEY,
+            student_id VARCHAR NOT NULL,
+            student_name VARCHAR(100),
+            batch VARCHAR(50),
+            teacher_id VARCHAR,
+            subject VARCHAR(100),
+            date DATE,
+            reason TEXT,
+            status VARCHAR(20) DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT NOW(),
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS exams (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(200) NOT NULL,
+            subject VARCHAR(100),
+            exam_date DATE NOT NULL,
+            exam_time VARCHAR(50),
+            batch VARCHAR(50) NOT NULL,
+            description TEXT,
+            created_by VARCHAR(100),
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+
         INSERT INTO site_stats (id, enrolled, years_running)
         VALUES (1, 0, 1)
         ON CONFLICT (id) DO NOTHING;
     """)
-
     conn.commit()
     cur.close()
     conn.close()
-    print("✅ Database initialized successfully")
+    print("Database initialized!")
