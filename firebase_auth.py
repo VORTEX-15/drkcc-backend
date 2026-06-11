@@ -9,7 +9,7 @@ load_dotenv()
 
 def init_firebase():
     if not firebase_admin._apps:
-        json_file = "dr-kcc-academy-app-firebase-adminsdk-fbsvc-389e6d2214.json"
+        json_file = "dr-kcc-academy-app-firebase-adminsdk-fbsvc-46d6afe9e1.json"
         if os.path.exists(json_file):
             cred = credentials.Certificate(json_file)
             firebase_admin.initialize_app(cred)
